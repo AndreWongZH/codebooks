@@ -49,9 +49,11 @@ int main() {
   return 0;
 }
 `
+const hostname = 'http://52.221.121.128:8080'
+// const hostname = 'http://localhost:8080'
 
-const SUBMITENDPOINT = "http://localhost:8080/api/v1/judge/submit"
-const socket = io("http://127.0.0.1:8080/");
+const SUBMITENDPOINT = hostname + "/api/v1/judge/submit"
+const socket = io(hostname);
 
 function CodeWindow({room_id, cloudInfo, name}) {
   const [code, setCode] = useState(sampleCode)

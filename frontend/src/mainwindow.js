@@ -4,9 +4,12 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import CodeWindow from './codewindow';
 
-const CREATENEWROOMAPI = 'http://localhost:8080/api/v1/room/create'
-const CHECKROOMAPI = 'http://localhost:8080/api/v1/room/check?room_id='
-const GETROOMAPI = 'http://localhost:8080/api/v1/room/get?room_id='
+const hostname = 'http://52.221.121.128:8080'
+// const hostname = 'http://localhost:8080'
+
+const CREATENEWROOMAPI = hostname + '/api/v1/room/create'
+const CHECKROOMAPI = hostname + '/api/v1/room/check?room_id='
+const GETROOMAPI = hostname + '/api/v1/room/get?room_id='
 
 function MainWindow() {
   const [isLogin, setLogin] = useState(false);
