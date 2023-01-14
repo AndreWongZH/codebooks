@@ -3,9 +3,11 @@ package main
 import (
 	"codebooks/judge"
 	"codebooks/room"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	socketio "github.com/googollee/go-socket.io"
 )
 
 func main() {
@@ -39,5 +41,20 @@ func main() {
 	judgeAPI := apiV1.Group("/judge")
 	judgeAPI.POST("/submit", judge.Submit)
 
+	go sockets()
 	r.Run()
+}
+
+func sockets() {
+	server := socketio.NewServer(nil)
+
+	server.OnConnect("/", func(c socketio.Conn) error {
+		c.SetContext("")
+		fmt.Println("connected:", c.ID())
+
+		return nil
+	})
+
+	go server.Serve()
+	defer server.Close()
 }
