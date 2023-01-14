@@ -1,9 +1,12 @@
+
 import React, { useEffect, useState } from 'react'
+import { encode, decode } from 'js-base64';
 
 
 import Button from 'react-bootstrap/Button';
 
-import { highlight, languages } from 'prismjs/components/prism-core';
+
+import { highlight } from 'prismjs/components/prism-core';
 import 'prismjs/components/prism-clike';
 import 'prismjs/components/prism-javascript';
 import 'prismjs/themes/prism.css';
@@ -14,6 +17,12 @@ import io from 'socket.io-client';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
+
+import Prism from 'prismjs';
+import 'prismjs/components/prism-python'
+import 'prismjs/components/prism-go'
+import 'prismjs/components/prism-c'
+import 'prismjs/components/prism-cpp'
 
 const sampleCode = `
 // this is a c code
@@ -32,7 +41,7 @@ const socket = io("http://127.0.0.1:8080/");
 function CodeWindow({room_id, cloudInfo, name}) {
   const [code, setCode] = useState(sampleCode)
   const [lang, setLang] = useState("c")
-  const [output, setOutput] = useState("output is here")
+  const [output, setOutput] = useState("~/Desktop/" + name + "$")
 
   useEffect(() => {
     if (cloudInfo) {
@@ -77,7 +86,7 @@ function CodeWindow({room_id, cloudInfo, name}) {
   }, []);
 
   const submitCode = async () => {
-    const source_code = btoa(code)
+    const source_code = encode(code)
     const bodyData = {
       source_code: source_code,
       language: lang,
@@ -92,15 +101,17 @@ function CodeWindow({room_id, cloudInfo, name}) {
 
     let outputData
     if (data.compile_output === "") {
-      outputData = "Output: " + atob(data.stdout) + "   Time taken: " + data.time + "s"
+      outputData = "> \n" + decode(data.stdout) + " \nTime taken: " + data.time + "s"
     } else {
+      console.log(data.compile_output)
+      console.log()
       let errorMsg = data.compile_output.split('\n');
       const errorMsgDecoded = errorMsg.map(el => {
-        return atob(el)
+        return decode(el)
       });
       const errorMsgString = errorMsgDecoded.join('\n')
       console.log(errorMsgString)
-      outputData = "Error compiling: " + errorMsgString
+      outputData = decode(data.compile_output)
     }
     
     setOutput(outputData)
@@ -108,17 +119,14 @@ function CodeWindow({room_id, cloudInfo, name}) {
 
   return (
     <div className='Container'>
-      <div className='row'>
-        <h1>Welcome to codebooks</h1>
-      </div>
 
       <div className='row'>
         <div className='col-9'>
-          <div style={{backgroundColor: '#e6ddc8', height: '60vh', overflow: 'scroll'}}>
+          <div style={{backgroundColor: '#e6ddc8', height: '70vh', overflow: 'scroll'}}>
             <Editor
               value={code}
               onValueChange={updateCode}
-              highlight={code => highlight(code, languages.js)}
+              highlight={code => highlight(code, Prism.languages.cpp, 'cpp')}
               padding={10}
               style={{
                 fontFamily: '"Fira code", "Fira Mono", monospace',
@@ -172,7 +180,7 @@ function CodeWindow({room_id, cloudInfo, name}) {
 
       <div className='row'>
         <div className='col'>
-          <div style={{whiteSpace: "pre-line", textAlign: "left"}}>
+          <div className="ps-2" style={{color: '#a3c2ab', background: '#1a211c', height: '23vh', whiteSpace: "break-spaces", textAlign: "left", overflow: 'scroll'}}>
             {output}
           </div>
         </div>
