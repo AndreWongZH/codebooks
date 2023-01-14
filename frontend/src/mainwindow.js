@@ -12,10 +12,6 @@ const GETROOMAPI = 'http://localhost:8080/api/v1/room/get?room_id='
 const BACKENDSERVER = 'http://localhost:8080/'
 
 const socket = io("http://127.0.0.1:8080/");
-// client-side
-socket.on("connect", () => {
-  console.log(socket.id);
-});
 
 function MainWindow() {
   const [isLogin, setLogin] = useState(false);
