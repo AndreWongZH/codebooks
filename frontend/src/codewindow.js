@@ -6,7 +6,7 @@ import { encode, decode } from 'js-base64';
 import Button from 'react-bootstrap/Button';
 
 
-import { highlight } from 'prismjs/components/prism-core';
+import { highlight, languages } from 'prismjs/components/prism-core';
 import 'prismjs/components/prism-clike';
 import 'prismjs/components/prism-javascript';
 import 'prismjs/components/prism-c';
@@ -140,7 +140,7 @@ function CodeWindow({room_id, cloudInfo, name}) {
             <Editor
               value={code}
               onValueChange={updateCode}
-              highlight={code => highlight(code, Prism.languages.cpp, 'cpp')}
+              highlight={code => highlight(code, languages.cpp, 'cpp')}
               padding={10}
               style={{
                 fontFamily: '"Fira code", "Fira Mono", monospace',
