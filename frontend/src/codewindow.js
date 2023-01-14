@@ -79,6 +79,8 @@ function CodeWindow({room_id, cloudInfo, name}) {
       console.log(msg)
     })
 
+    socket.emit("joinroom", room_id)
+
     return () => {
       socket.off('noedit');
       socket.off('edit');
