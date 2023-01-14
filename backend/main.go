@@ -17,6 +17,9 @@ func main() {
 	})
 
 	apiGroup := r.Group("/api")
+	apiGroup.Use(func(ctx *gin.Context) {
+		ctx.Header("Access-Control-Allow-Origin", "*")
+	})
 
 	// v1 API
 	apiV1 := apiGroup.Group("/v1")
