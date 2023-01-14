@@ -1,7 +1,5 @@
 import React, {useState, useEffect} from 'react'
 
-import io from 'socket.io-client';
-
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import CodeWindow from './codewindow';
@@ -9,9 +7,6 @@ import CodeWindow from './codewindow';
 const CREATENEWROOMAPI = 'http://localhost:8080/api/v1/room/create'
 const CHECKROOMAPI = 'http://localhost:8080/api/v1/room/check?room_id='
 const GETROOMAPI = 'http://localhost:8080/api/v1/room/get?room_id='
-const BACKENDSERVER = 'http://localhost:8080/'
-
-const socket = io("http://127.0.0.1:8080/");
 
 function MainWindow() {
   const [isLogin, setLogin] = useState(false);
@@ -31,7 +26,7 @@ function MainWindow() {
       method: 'POST'
     })
     const data = await response.json()
-    console.log(data)
+    setCloudInfo(data)
     setRoom(data.room_id)
     setLogin(true)
   }

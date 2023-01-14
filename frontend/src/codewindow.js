@@ -5,7 +5,6 @@ import { encode, decode } from 'js-base64';
 
 import Button from 'react-bootstrap/Button';
 
-
 import { highlight, languages } from 'prismjs/components/prism-core';
 import 'prismjs/components/prism-clike';
 import 'prismjs/components/prism-javascript';
@@ -15,18 +14,30 @@ import 'prismjs/components/prism-go';
 import 'prismjs/components/prism-python';
 import 'prismjs/themes/prism.css';
 import Editor from 'react-simple-code-editor'
-import Form from 'react-bootstrap/Form';
 import io from 'socket.io-client';
 
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 
-import Prism from 'prismjs';
 import 'prismjs/components/prism-python'
 import 'prismjs/components/prism-go'
 import 'prismjs/components/prism-c'
 import 'prismjs/components/prism-cpp'
+
+const langMap = {
+  "c": languages.c,
+  "c++": languages.cpp,
+  "golang": languages.go,
+  "python3": languages.python
+}
+
+const langMap2 = {
+  "c": "c",
+  "c++": "cpp",
+  "golang": "go",
+  "python3": "python"
+}
 
 const sampleCode = `
 // this is a c code
@@ -73,9 +84,11 @@ function CodeWindow({room_id, cloudInfo, name}) {
 
   const changeColor = async (userid) => {
     const el = document.getElementById(userid);
-    el.style.backgroundColor = 'red'
-    await new Promise(r => setTimeout(r, 500));
-    el.style.backgroundColor = '#31a346'
+    if (el) {
+      el.style.backgroundColor = 'red'
+      await new Promise(r => setTimeout(r, 500));
+      el.style.backgroundColor = '#31a346'
+    }
   }
 
   const changeLock = async () => {
@@ -123,6 +136,7 @@ function CodeWindow({room_id, cloudInfo, name}) {
   }, []);
 
   const submitCode = async () => {
+    setOutput("Executing code ... .. .")
     const source_code = encode(code)
     const bodyData = {
       source_code: source_code,
@@ -135,19 +149,19 @@ function CodeWindow({room_id, cloudInfo, name}) {
       body: JSON.stringify(bodyData)
     })
     const data = await response.json()
-
+    console.log(data)
     let outputData
     if (data.compile_output === "") {
-      outputData = "> \n" + decode(data.stdout) + " \nTime taken: " + data.time + "s"
+      if (data.stderr) {
+        outputData = decode(data.stderr)
+      } else {
+        if (data.stdout) {
+          outputData = "> \n" + decode(data.stdout) + " \nTime taken: " + data.time + "s"
+        } else {
+          outputData = "> \n"
+        }
+      }
     } else {
-      console.log(data.compile_output)
-      console.log()
-      let errorMsg = data.compile_output.split('\n');
-      const errorMsgDecoded = errorMsg.map(el => {
-        return decode(el)
-      });
-      const errorMsgString = errorMsgDecoded.join('\n')
-      console.log(errorMsgString)
       outputData = decode(data.compile_output)
     }
     
@@ -163,7 +177,7 @@ function CodeWindow({room_id, cloudInfo, name}) {
             <Editor
               value={code}
               onValueChange={updateCode}
-              highlight={code => highlight(code, languages.cpp, 'cpp')}
+              highlight={code => highlight(code, langMap[lang], langMap2[lang])}
               padding={10}
               style={{
                 fontFamily: '"Fira code", "Fira Mono", monospace',
