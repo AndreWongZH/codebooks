@@ -46,6 +46,8 @@ function CodeWindow({room_id, cloudInfo, name}) {
   const [code, setCode] = useState(sampleCode)
   const [lang, setLang] = useState("c")
   const [output, setOutput] = useState("~/Desktop/" + name + "$")
+  const [users, setUsers] = useState([name])
+  const [lock, setLock] = useState(true)
 
   useEffect(() => {
     if (cloudInfo) {
@@ -56,6 +58,9 @@ function CodeWindow({room_id, cloudInfo, name}) {
   }, [cloudInfo])
 
   const updateCode = (code) => {
+    if (!lock) {
+      return
+    }
     setCode(code)
     const obj = {
       "source_code": code,
@@ -66,11 +71,26 @@ function CodeWindow({room_id, cloudInfo, name}) {
     
   }
 
+  const changeColor = async (userid) => {
+    const el = document.getElementById(userid);
+    el.style.backgroundColor = 'red'
+    await new Promise(r => setTimeout(r, 500));
+    el.style.backgroundColor = '#31a346'
+  }
+
+  const changeLock = async () => {
+    setLock(false)
+    await new Promise(r => setTimeout(r, 500));
+    setLock(true)
+  }
+
   useEffect(() => {
 
     socket.on("newcode", (msg) => {
       const obj = JSON.parse(msg)
       if (obj.user !== name) {
+        changeColor(obj.user)
+        changeLock()
         setCode(obj.source_code)
       }
       console.log(msg)
@@ -92,6 +112,9 @@ function CodeWindow({room_id, cloudInfo, name}) {
 
     socket.on("active_users", (msg) => {
       console.log(msg)
+      const set = new Set(msg);
+      set.delete(name)
+      setUsers([name, ...Array.from(set)])
     })
 
     return () => {
@@ -152,6 +175,20 @@ function CodeWindow({room_id, cloudInfo, name}) {
         <div className='col-3'>
           <h3>Room</h3>
           <h6>{room_id}</h6>
+
+          <h3>Users</h3>
+          <div style={{width: '100%', margin: 'auto'}}>
+            {
+              users.map((name, index) => {
+                return (
+                  <div key={name + "container"} className="py-2 mb-2" style={{display: 'flex', justifyContent: 'start', background: '#D9D9D9', alignItems: 'center', borderRadius: '20px'}}>
+                      <div key={name + "color"} id={name} className="ms-4" style={{borderRadius: '100%', background: '#31a346', width: '30px', height: '30px'}} />
+                      <div key={name + "name"} className="ms-4" >{name}</div>
+                  </div>
+                )
+              })
+            }
+          </div>
         </div>
       </div>
       
