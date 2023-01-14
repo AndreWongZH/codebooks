@@ -38,7 +38,6 @@ function MainWindow() {
     console.log(data)
     setRoom(data.room_id)
     setLogin(true)
-    socket.emit("joinroom", data.room_id)
   }
 
   const JoinRoom = async () => {
@@ -58,7 +57,6 @@ function MainWindow() {
     
     if (data.result) {
       console.log("room exist")
-      socket.emit("joinroom", room)
 
       const response = await fetch(GETROOMAPI + room)
       const data = await response.json()

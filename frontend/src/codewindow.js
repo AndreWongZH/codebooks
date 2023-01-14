@@ -6,6 +6,10 @@ import Button from 'react-bootstrap/Button';
 import { highlight, languages } from 'prismjs/components/prism-core';
 import 'prismjs/components/prism-clike';
 import 'prismjs/components/prism-javascript';
+import 'prismjs/components/prism-c';
+import 'prismjs/components/prism-cpp';
+import 'prismjs/components/prism-go';
+import 'prismjs/components/prism-python';
 import 'prismjs/themes/prism.css';
 import Editor from 'react-simple-code-editor'
 import Form from 'react-bootstrap/Form';
@@ -54,13 +58,6 @@ function CodeWindow({room_id, cloudInfo, name}) {
   }
 
   useEffect(() => {
-    socket.on("noedit", () => {
-      console.log("noedit")
-    })
-
-    socket.on("edit", () => {
-      console.log("edit")
-    })
 
     socket.on("newcode", (msg) => {
       const obj = JSON.parse(msg)
@@ -70,11 +67,26 @@ function CodeWindow({room_id, cloudInfo, name}) {
       console.log(msg)
     })
 
-    socket.emit("joinroom", room_id)
+    socket.emit("joinroom", JSON.stringify({
+      "room_id": room_id,
+      "source_code": "",
+      "user": name,
+    }))
+
+    socket.on("ping", () => 
+      socket.emit("pongpong", JSON.stringify({
+        "room_id": room_id,
+        "source_code": "",
+        "user": name,
+      }))
+    )
+
+    socket.on("active_users", (msg) => {
+      console.log(msg)
+    })
 
     return () => {
-      socket.off('noedit');
-      socket.off('edit');
+      socket.off('newcode');
     };
   }, []);
 
@@ -120,7 +132,7 @@ function CodeWindow({room_id, cloudInfo, name}) {
             <Editor
               value={code}
               onValueChange={updateCode}
-              highlight={code => highlight(code, languages.js)}
+              highlight={code => highlight(code, languages.cpp, 'cpp')}
               padding={10}
               style={{
                 fontFamily: '"Fira code", "Fira Mono", monospace',
