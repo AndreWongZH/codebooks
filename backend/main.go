@@ -94,9 +94,15 @@ func main() {
 	// rooms
 	roomAPI := apiV1.Group("/room")
 	roomAPI.POST("/create", room.CreateRoom)
-	roomAPI.GET("/get", room.GetRoom)
+	roomAPI.GET("/get", func(ctx *gin.Context) {
+		roomID := ctx.Query("room_id")
+		SaveSpecificRoom(roomID)
+	}, room.GetRoom)
 	roomAPI.POST("/save", room.SaveRoom)
-	roomAPI.GET("/check", room.CheckRoom)
+	roomAPI.GET("/check", func(ctx *gin.Context) {
+		roomID := ctx.Query("room_id")
+		SaveSpecificRoom(roomID)
+	}, room.CheckRoom)
 
 	// judge
 	judgeAPI := apiV1.Group("/judge")
