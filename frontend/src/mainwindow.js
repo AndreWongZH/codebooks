@@ -14,19 +14,20 @@ socket.on("connect", () => {
   console.log(socket.id); // x8WIv7-mJelg7on_ALbx
 });
 
-const CreateNewRoom = async (setLogin) => {
-  console.log("Creating room...")
-  // const response = await fetch(CREATENEWROOMAPI, {
-  //   method: 'POST'
-  // })
-  // const data = await response.json()
-  // console.log(data)
-  setLogin(true)
-
-}
-
 function MainWindow() {
   const [isLogin, setLogin] = useState(false);
+  const [room, setRoom] = useState(null);
+
+  const CreateNewRoom = async () => {
+    console.log("Creating room...")
+    const response = await fetch(CREATENEWROOMAPI, {
+      method: 'POST'
+    })
+    const data = await response.json()
+    console.log(data)
+    setRoom(data.room_id)
+    setLogin(true)
+  }
 
   useEffect(() => {
 
@@ -35,7 +36,7 @@ function MainWindow() {
   return (
     <div>
       { 
-        isLogin ? <CodeWindow /> :
+        isLogin ? <CodeWindow room_id={room}/> :
         (
           <div className='Container'>
             <div className='row'>
