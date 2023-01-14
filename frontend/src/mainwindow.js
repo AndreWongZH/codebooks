@@ -8,6 +8,12 @@ import CodeWindow from './codewindow';
 const CREATENEWROOMAPI = 'http://localhost:8080/api/v1/room/create'
 const BACKENDSERVER = 'http://localhost:8080/'
 
+const socket = io("http://127.0.0.1:8080/");
+// client-side
+socket.on("connect", () => {
+  console.log(socket.id); // x8WIv7-mJelg7on_ALbx
+});
+
 const CreateNewRoom = async (setLogin) => {
   console.log("Creating room...")
   // const response = await fetch(CREATENEWROOMAPI, {
@@ -16,9 +22,7 @@ const CreateNewRoom = async (setLogin) => {
   // const data = await response.json()
   // console.log(data)
   setLogin(true)
-  
 
-  const socket = io("http://127.0.0.1:8080/");
 }
 
 function MainWindow() {
@@ -38,6 +42,7 @@ function MainWindow() {
               <div className='col'>
                 <h1>CodeBooks</h1>
                 <Button onClick={() => CreateNewRoom(setLogin)}>Create New Room</Button>
+                <Button onClick={() => socket.emit("result", "hello world")}>Emit</Button>
               </div>
             </div>
           </div>

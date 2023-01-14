@@ -22,6 +22,10 @@ func main() {
 		return nil
 	})
 
+	server.OnEvent("/", "result", func(c socketio.Conn, msg string) {
+		fmt.Println(fmt.Printf("received msg %s from id %s", msg, c.ID()))
+	})
+
 	// API server
 	r.GET("/status", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
