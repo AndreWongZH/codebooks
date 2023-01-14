@@ -22,6 +22,9 @@ type SocketStruct struct {
 var roomsList = make(map[string][]string)
 var roomsLock = sync.Mutex{}
 
+var roomsCode = make(map[string]string)
+var codeLock = sync.Mutex{}
+
 func main() {
 	r := gin.Default()
 	r.Use(GinMiddleware("http://localhost:3000"))
@@ -59,6 +62,8 @@ func main() {
 		var socketReq SocketStruct
 		json.Unmarshal([]byte(msg), &socketReq)
 		fmt.Println(socketReq)
+
+		go UpdateCodeLock(socketReq.RoomID, socketReq.SourceCode)
 
 		b, _ := json.Marshal(&SocketStruct{
 			SourceCode: socketReq.SourceCode,
@@ -104,6 +109,7 @@ func main() {
 	defer server.Close()
 
 	go ActiveRoomPinger(server)
+	go CodeSaver()
 
 	r.Run()
 }
@@ -112,17 +118,47 @@ func GinMiddleware(allowOrigin string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", allowOrigin)
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Accept, Authorization, Content-Type, Content-Length, X-CSRF-Token, Token, session, Origin, Host, Connection, Accept-Encoding, Accept-Language, X-Requested-With")
+	}
+}
 
-		if c.Request.Method == http.MethodOptions {
-			c.AbortWithStatus(http.StatusNoContent)
-			return
-		}
+func SaveSpecificRoom(roomID string) {
+	codeLock.Lock()
+	defer codeLock.Unlock()
 
-		c.Request.Header.Del("Origin")
+	if _, ok := roomsCode[roomID]; ok {
+		room.SaveRoomObject(room.RoomObject{
+			ID:         roomID,
+			SourceCode: roomsCode[roomID],
+			Language:   "",
+		})
+	}
+}
 
-		c.Next()
+func UpdateCodeLock(roomID, sourceCode string) {
+	codeLock.Lock()
+	defer codeLock.Unlock()
+
+	roomsCode[roomID] = sourceCode
+}
+
+func CodeSaver() {
+	for {
+		func() {
+			time.Sleep(time.Second * 10)
+			codeLock.Lock()
+			defer codeLock.Unlock()
+
+			for roomID, sourceCode := range roomsCode {
+				fmt.Println("saved code for room: ", roomID)
+				room.SaveRoomObject(room.RoomObject{
+					ID:         roomID,
+					SourceCode: sourceCode,
+					Language:   "",
+				})
+			}
+
+			roomsCode = make(map[string]string)
+		}()
 	}
 }
 
