@@ -78,7 +78,7 @@ function MainWindow() {
   return (
     <div style={{height: '100vh'}}>
       { 
-        isLogin ? <CodeWindow room_id={room} cloudInfo={cloudInfo} /> :
+        isLogin ? <CodeWindow room_id={room} cloudInfo={cloudInfo} name={name}/> :
         (
           <div className='Container' style={{background: '#C5D4D2', height: '100vh'}}>
             <div className='row'>
