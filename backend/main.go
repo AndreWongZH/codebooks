@@ -13,18 +13,12 @@ import (
 	socketio "github.com/googollee/go-socket.io"
 )
 
-type LastEdit struct {
-	Timestamp    time.Time
-	LastEditUser string
-}
-
 type SocketStruct struct {
 	SourceCode string `json:"source_code"`
 	User       string `json:"user"`
 	RoomID     string `json:"room_id"`
 }
 
-// var rooms = map[string]LastEdit{}
 var roomsList = make(map[string][]string)
 var roomsLock = sync.Mutex{}
 
@@ -65,9 +59,6 @@ func main() {
 		var socketReq SocketStruct
 		json.Unmarshal([]byte(msg), &socketReq)
 		fmt.Println(socketReq)
-		// c.Join(socketReq.RoomID)
-		// fmt.Println(c.Rooms())
-		// fmt.Println(server.Rooms("/"))
 
 		b, _ := json.Marshal(&SocketStruct{
 			SourceCode: socketReq.SourceCode,
@@ -75,29 +66,6 @@ func main() {
 			RoomID:     socketReq.RoomID,
 		})
 		server.BroadcastToRoom("/", socketReq.RoomID, "newcode", string(b))
-
-		// emit back to user that he cannot edit
-		c.Emit("edit")
-
-		// roomID, user := "", ""
-		// timestamp := time.Now()
-
-		// if _, ok := rooms[roomID]; !ok {
-		// 	rooms[roomID] = LastEdit{
-		// 		Timestamp:    time.Unix(0, 0),
-		// 		LastEditUser: "",
-		// 	}
-		// }
-
-		// if rooms[roomID].Timestamp.Unix()-timestamp.Unix() < 5 && rooms[roomID].LastEditUser != user {
-		// 	// error if user is different
-		// 	c.Emit("noedit")
-		// } else {
-		// 	// allow the edit
-		// 	rooms[roomID] = LastEdit{
-		// 		LastEditUser: user,
-		// 		Timestamp:    timestamp,
-		// 	}
 	})
 
 	// API server
