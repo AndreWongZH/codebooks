@@ -12,6 +12,7 @@ import (
 
 func main() {
 	r := gin.Default()
+	r.Use(GinMiddleware("http://localhost:3000"))
 
 	// socket server
 	server := socketio.NewServer(nil)
@@ -53,7 +54,6 @@ func main() {
 	judgeAPI := apiV1.Group("/judge")
 	judgeAPI.POST("/submit", judge.Submit)
 
-	r.Use(GinMiddleware("http://localhost:3000"))
 	r.GET("/socket.io/*any", gin.WrapH(server))
 	r.POST("/socket.io/*any", gin.WrapH(server))
 
