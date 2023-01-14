@@ -23,6 +23,10 @@ func main() {
 	})
 
 	// API server
+	r.Use(func(ctx *gin.Context) {
+		ctx.Header("Access-Control-Allow-Origin", "*")
+	})
+
 	r.GET("/status", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"status": "ok",
@@ -30,9 +34,6 @@ func main() {
 	})
 
 	apiGroup := r.Group("/api")
-	apiGroup.Use(func(ctx *gin.Context) {
-		ctx.Header("Access-Control-Allow-Origin", "*")
-	})
 
 	// v1 API
 	apiV1 := apiGroup.Group("/v1")
@@ -52,8 +53,8 @@ func main() {
 	judgeAPI := apiV1.Group("/judge")
 	judgeAPI.POST("/submit", judge.Submit)
 
-	apiV1.GET("/socket/*any", gin.WrapH(server))
-	apiV1.POST("/socket/*any", gin.WrapH(server))
+	r.GET("/socket.io/*any", gin.WrapH(server))
+	r.POST("/socket.io/*any", gin.WrapH(server))
 	go server.Serve()
 	defer server.Close()
 
