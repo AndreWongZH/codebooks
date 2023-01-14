@@ -13,6 +13,13 @@ type RoomObject struct {
 	Language   string `json:"language"`
 }
 
+func CheckRoomExistsObject(roomID string) bool {
+	filePath := getFilePathFromRoomID(roomID)
+	_, err := os.ReadFile(filePath)
+
+	return err == nil
+}
+
 func ReadRoomObject(roomID string) (*RoomObject, error) {
 	var room RoomObject
 	fmt.Println("read room")
@@ -62,4 +69,9 @@ func createDefaultRoom(roomID, filePath string) (*RoomObject, error) {
 		ID:         roomID,
 		Language:   "c++",
 	}, nil
+}
+
+func getFilePathFromRoomID(roomID string) string {
+	workingDir, _ := os.Getwd()
+	return workingDir + constants.PathSeparatorStr + "data" + constants.PathSeparatorStr + roomID
 }

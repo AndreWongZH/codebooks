@@ -10,6 +10,22 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func CheckRoom(c *gin.Context) {
+	roomID := c.Query("room_id")
+	if roomID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status": "specify room_id",
+		})
+		return
+	}
+
+	exists := CheckRoomExistsObject(roomID)
+	c.JSON(http.StatusOK, gin.H{
+		"status": "ok",
+		"result": exists,
+	})
+}
+
 func CreateRoom(c *gin.Context) {
 	// generate random base64 room_id
 	b := make([]byte, 18)
