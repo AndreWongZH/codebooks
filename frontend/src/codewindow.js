@@ -10,6 +10,10 @@ import 'prismjs/themes/prism.css';
 import Editor from 'react-simple-code-editor'
 import Form from 'react-bootstrap/Form';
 
+import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import Dropdown from 'react-bootstrap/Dropdown';
+import DropdownButton from 'react-bootstrap/DropdownButton';
+
 const sampleCode = `
 // this is a c code
 
@@ -23,10 +27,18 @@ int main() {
 
 const SUBMITENDPOINT = "http://localhost:8080/api/v1/judge/submit"
 
-function CodeWindow({room_id}) {
+function CodeWindow({room_id, cloudInfo}) {
   const [code, setCode] = useState(sampleCode)
   const [lang, setLang] = useState("c")
   const [output, setOutput] = useState("output is here")
+
+  useEffect(() => {
+    if (cloudInfo) {
+      console.log(cloudInfo)
+      setCode(cloudInfo.source_code)
+      setLang(cloudInfo.language)
+    }
+  }, [cloudInfo])
 
   const submitCode = async () => {
     const source_code = btoa(code)
@@ -88,11 +100,29 @@ function CodeWindow({room_id}) {
 
       <div className='row' style={{background: "#CCCCCC"}}>
         <div className='col'>
-          <Button onClick={() => submitCode()}>RUN</Button>
+          <Button size="lg" style={{width: '100%', borderRadius: '0px', background: '#70B6DD', borderColor: '#70B6DD'}} onClick={() => submitCode()}>RUN</Button>
         </div>
         <div className='col-8'></div>
         <div className='col'>
-          <Form.Select
+          {
+            <DropdownButton
+              style={{width: '100%', borderRadius: '0px', background: '#70B6DD', borderColor: '#70B6DD', color: '#EEEEEE'}}
+              as={ButtonGroup}
+              size="lg"
+              variant='#70B6DD'
+              // key={variant}
+              // id={`dropdown-variants-${variant}`}
+              // variant={variant.toLowerCase()}
+              title={lang}
+              
+            >
+              <Dropdown.Item eventKey="c" onClick={(e) => setLang(e.target.text)} >c</Dropdown.Item>
+              <Dropdown.Item eventKey="c++" onClick={(e) => setLang(e.target.text)} >c++</Dropdown.Item>
+              <Dropdown.Item eventKey="golang" onClick={(e) => setLang(e.target.text)} >golang</Dropdown.Item>
+              <Dropdown.Item eventKey="python3" onClick={(e) => setLang(e.target.text)} >python3</Dropdown.Item>
+            </DropdownButton>
+          }
+          {/* <Form.Select
             aria-label="Default select example"
             onChange={(e) => setLang(e.target.value)}
           >
@@ -100,7 +130,7 @@ function CodeWindow({room_id}) {
             <option value="c++">c++</option>
             <option value="golang">golang</option>
             <option value="python3">python3</option>
-          </Form.Select>
+          </Form.Select> */}
         </div>
       </div>
 
