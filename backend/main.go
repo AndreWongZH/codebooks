@@ -50,6 +50,7 @@ func main() {
 	roomAPI.POST("/create", room.CreateRoom)
 	roomAPI.GET("/get", room.GetRoom)
 	roomAPI.POST("/save", room.SaveRoom)
+	roomAPI.GET("/check", room.CheckRoom)
 
 	// judge
 	judgeAPI := apiV1.Group("/judge")
