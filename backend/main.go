@@ -49,11 +49,7 @@ func main() {
 		fmt.Printf("receive pong\n")
 		var socketReq SocketStruct
 		json.Unmarshal([]byte(msg), &socketReq)
-		go func(roomID, user string) {
-			roomsLock.Lock()
-			roomsList[roomID] = append(roomsList[roomID], user)
-			roomsLock.Unlock()
-		}(socketReq.RoomID, socketReq.User)
+		go AddUserToRoom(socketReq.User, socketReq.RoomID)
 		fmt.Printf("receive pong from %v  of room %v\n", socketReq.User, socketReq.RoomID)
 	})
 
@@ -61,12 +57,7 @@ func main() {
 		var socketReq SocketStruct
 		json.Unmarshal([]byte(msg), &socketReq)
 		fmt.Printf("%v joining room %v\n", socketReq.User, socketReq.RoomID)
-		// roomsList[socketReq.RoomID][socketReq.User] = true
-		go func(roomID, user string) {
-			roomsLock.Lock()
-			roomsList[socketReq.RoomID] = append(roomsList[socketReq.RoomID], socketReq.User)
-			roomsLock.Unlock()
-		}(socketReq.RoomID, socketReq.User)
+		go AddUserToRoom(socketReq.User, socketReq.RoomID)
 		c.Join(socketReq.RoomID)
 	})
 
@@ -167,12 +158,23 @@ func GinMiddleware(allowOrigin string) gin.HandlerFunc {
 	}
 }
 
+func AddUserToRoom(userID, roomID string) {
+	roomsLock.Lock()
+	defer roomsLock.Unlock()
+	for _, userIn := range roomsList[roomID] {
+		if userIn == userID {
+			return
+		}
+	}
+	roomsList[roomID] = append(roomsList[roomID], userID)
+}
+
 func ActiveRoomPinger(server *socketio.Server) {
 	for {
 		func() {
 			roomsLock.Lock()
 			for k := range roomsList {
-				roomsList[k] = make([]string, 0)
+				roomsList[k] = roomsList[k][0:0]
 				server.BroadcastToRoom("/", k, "ping")
 			}
 			defer roomsLock.Unlock()
