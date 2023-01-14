@@ -3,12 +3,27 @@ package main
 import (
 	"codebooks/judge"
 	"codebooks/room"
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	socketio "github.com/googollee/go-socket.io"
 )
+
+type LastEdit struct {
+	Timestamp    time.Time
+	LastEditUser string
+}
+
+type SocketStruct struct {
+	SourceCode string `json:"source_code"`
+	User       string `json:"user"`
+	RoomID     string `json:"room_id"`
+}
+
+var rooms = map[string]LastEdit{}
 
 func main() {
 	r := gin.Default()
@@ -30,6 +45,44 @@ func main() {
 	server.OnEvent("/", "joinroom", func(c socketio.Conn, msg string) {
 		fmt.Println("joining room", msg)
 		c.Join(msg)
+	})
+
+	server.OnEvent("/", "edit", func(c socketio.Conn, msg string) {
+		var socketReq SocketStruct
+		json.Unmarshal([]byte(msg), &socketReq)
+		fmt.Println(socketReq)
+		c.Join(socketReq.RoomID)
+		fmt.Println(c.Rooms())
+
+		b, _ := json.Marshal(&SocketStruct{
+			SourceCode: socketReq.SourceCode,
+			User:       socketReq.User,
+			RoomID:     socketReq.RoomID,
+		})
+		server.BroadcastToRoom("/", socketReq.RoomID, "newcode", string(b))
+
+		// emit back to user that he cannot edit
+		c.Emit("edit")
+
+		// roomID, user := "", ""
+		// timestamp := time.Now()
+
+		// if _, ok := rooms[roomID]; !ok {
+		// 	rooms[roomID] = LastEdit{
+		// 		Timestamp:    time.Unix(0, 0),
+		// 		LastEditUser: "",
+		// 	}
+		// }
+
+		// if rooms[roomID].Timestamp.Unix()-timestamp.Unix() < 5 && rooms[roomID].LastEditUser != user {
+		// 	// error if user is different
+		// 	c.Emit("noedit")
+		// } else {
+		// 	// allow the edit
+		// 	rooms[roomID] = LastEdit{
+		// 		LastEditUser: user,
+		// 		Timestamp:    timestamp,
+		// 	}
 	})
 
 	// API server

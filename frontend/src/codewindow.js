@@ -9,6 +9,7 @@ import 'prismjs/components/prism-javascript';
 import 'prismjs/themes/prism.css';
 import Editor from 'react-simple-code-editor'
 import Form from 'react-bootstrap/Form';
+import io from 'socket.io-client';
 
 const sampleCode = `
 // this is a c code
@@ -22,11 +23,46 @@ int main() {
 `
 
 const SUBMITENDPOINT = "http://localhost:8080/api/v1/judge/submit"
+const socket = io("http://127.0.0.1:8080/");
 
 function CodeWindow({room_id}) {
   const [code, setCode] = useState(sampleCode)
   const [lang, setLang] = useState("c")
   const [output, setOutput] = useState("output is here")
+
+  const updateCode = (code) => {
+    setCode(code)
+    const obj = {
+      "source_code": code,
+      "user": "3",
+      "room_id": "f",
+    }
+    socket.emit("edit", JSON.stringify(obj))
+    
+  }
+
+  useEffect(() => {
+    socket.on("noedit", () => {
+      console.log("noedit")
+    })
+
+    socket.on("edit", () => {
+      console.log("edit")
+    })
+
+    socket.on("newcode", (msg) => {
+      const obj = JSON.parse(msg)
+      if (obj.user !== "3") {
+        setCode(obj.source_code)
+      }
+      console.log(msg)
+    })
+
+    return () => {
+      socket.off('noedit');
+      socket.off('edit');
+    };
+  }, []);
 
   const submitCode = async () => {
     const source_code = btoa(code)
@@ -69,7 +105,7 @@ function CodeWindow({room_id}) {
           <div style={{backgroundColor: '#e6ddc8', height: '60vh', overflow: 'scroll'}}>
             <Editor
               value={code}
-              onValueChange={code => setCode(code)}
+              onValueChange={updateCode}
               highlight={code => highlight(code, languages.js)}
               padding={10}
               style={{
