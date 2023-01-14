@@ -27,6 +27,11 @@ func main() {
 		fmt.Println(fmt.Printf("received msg %s from id %s", msg, c.ID()))
 	})
 
+	server.OnEvent("/", "joinroom", func(c socketio.Conn, msg string) {
+		fmt.Println("joining room", msg)
+		c.Join(msg)
+	})
+
 	// API server
 	r.GET("/status", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
