@@ -6,7 +6,7 @@ import Button from 'react-bootstrap/Button';
 import CodeWindow from './codewindow';
 
 const CREATENEWROOMAPI = 'http://localhost:8080/api/v1/room/create'
-const BACKENDSERVER = 'http://localhost:8080'
+const BACKENDSERVER = 'http://localhost:8080/'
 
 const CreateNewRoom = async (setLogin) => {
   console.log("Creating room...")
@@ -18,7 +18,7 @@ const CreateNewRoom = async (setLogin) => {
   setLogin(true)
   
 
-  // const socket = io(BACKENDSERVER);
+  const socket = io("http://127.0.0.1:8080/");
 }
 
 function MainWindow() {
