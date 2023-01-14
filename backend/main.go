@@ -12,6 +12,17 @@ import (
 
 func main() {
 	r := gin.Default()
+
+	// socket server
+	server := socketio.NewServer(nil)
+	server.OnConnect("/", func(c socketio.Conn) error {
+		c.SetContext("")
+		fmt.Println("connected:", c.ID())
+
+		return nil
+	})
+
+	// API server
 	r.GET("/status", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"status": "ok",
@@ -41,20 +52,10 @@ func main() {
 	judgeAPI := apiV1.Group("/judge")
 	judgeAPI.POST("/submit", judge.Submit)
 
-	go sockets()
-	r.Run()
-}
-
-func sockets() {
-	server := socketio.NewServer(nil)
-
-	server.OnConnect("/", func(c socketio.Conn) error {
-		c.SetContext("")
-		fmt.Println("connected:", c.ID())
-
-		return nil
-	})
-
+	apiV1.GET("/socket/*any", gin.WrapH(server))
+	apiV1.POST("/socket/*any", gin.WrapH(server))
 	go server.Serve()
 	defer server.Close()
+
+	r.Run()
 }
