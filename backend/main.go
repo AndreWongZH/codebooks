@@ -51,7 +51,7 @@ func main() {
 		var socketReq SocketStruct
 		json.Unmarshal([]byte(msg), &socketReq)
 		fmt.Println(socketReq)
-		c.Join(socketReq.RoomID)
+		// c.Join(socketReq.RoomID)
 		fmt.Println(c.Rooms())
 
 		b, _ := json.Marshal(&SocketStruct{
