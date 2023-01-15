@@ -189,10 +189,10 @@ function CodeWindow({room_id, cloudInfo, name}) {
           </div>
         </div>
         <div className='col-3'>
-          <h3>Room</h3>
-          <h6>{room_id}</h6>
+          <h3 className='mt-2'>Room</h3>
+          <div className='py-2' style={{background: '#D9D9D9', borderRadius: '20px', fontSize: '50px'}}>{room_id}</div>
 
-          <h3>Users</h3>
+          <h3 className='mt-5'>Users</h3>
           <div style={{width: '100%', margin: 'auto'}}>
             {
               users.map((name, index) => {
